@@ -24,8 +24,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final List<String> categories = ['Semua', 'Cewek', 'Cowok', 'Atasan', 'Bawahan', 'Aksesoris'];
   final formatRupiah = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-  int selectedCategoryIndex = 0;
-  int selectedPriceRange = 0;
+  int selectedCategoryIndex = -1;
+  int selectedPriceRange = -1;
   List<bool> isFavorited = List.generate(7, (_) => false);
 
   // Data produk
@@ -42,20 +42,26 @@ class _HomeState extends State<Home> {
   // Filter produk berdasarkan kategori dan harga
   List<Product> get filteredProducts {
     List<Product> filtered = allProducts;
-    String selectedCategory = categories[selectedCategoryIndex];
 
+  if (selectedCategoryIndex != -1) {
+    String selectedCategory = categories[selectedCategoryIndex];
     if (selectedCategory != 'Semua') {
       filtered = filtered.where((product) => product.category == selectedCategory).toList();
     }
+  }
+    
 
     // Filter berdasarkan harga
-    if (selectedPriceRange == 0) {
-      filtered = filtered.where((product) => product.price < 50000).toList();
-    } else if (selectedPriceRange == 1) {
-      filtered = filtered.where((product) => product.price >= 50000 && product.price <= 100000).toList();
-    } else if (selectedPriceRange == 2) {
-      filtered = filtered.where((product) => product.price > 100000).toList();
-    }
+   if (selectedPriceRange != -1) {
+  if (selectedPriceRange == 0) {
+    filtered = filtered.where((product) => product.price < 50000).toList();
+  } else if (selectedPriceRange == 1) {
+    filtered = filtered.where((product) => product.price >= 50000 && product.price <= 100000).toList();
+  } else if (selectedPriceRange == 2) {
+    filtered = filtered.where((product) => product.price > 100000).toList();
+  }
+}
+
 
     return filtered;
   }
@@ -268,7 +274,11 @@ class _HomeState extends State<Home> {
                     selected: selectedCategoryIndex == index,
                     onSelected: (bool selected) {
                       setModalState(() {
-                        selectedCategoryIndex = index;
+                        if (selectedCategoryIndex == index) {
+                          selectedCategoryIndex = -1;
+                        } else {
+                          selectedCategoryIndex = index;
+                        }
                       });
                     },
                   );
@@ -282,32 +292,56 @@ class _HomeState extends State<Home> {
                   FilterChip(
                     label: Text("< Rp50rb"),
                     selected: selectedPriceRange == 0,
-                    onSelected: (_) => setModalState(() => selectedPriceRange = 0),
+                    onSelected: (_) {
+                      setModalState(() {
+                         selectedPriceRange = (selectedPriceRange == 0) ? -1 : 0;
+                      });
+                    },
                   ),
                   FilterChip(
                     label: Text("Rp50rb–Rp100rb"),
                     selected: selectedPriceRange == 1,
-                    onSelected: (_) => setModalState(() => selectedPriceRange = 1),
+                    onSelected: (_) {setModalState(() { selectedPriceRange = (selectedPriceRange == 1) ? -1 : 1;
+                      });
+                    },
                   ),
                   FilterChip(
                     label: Text("> Rp100rb"),
                     selected: selectedPriceRange == 2,
-                    onSelected: (_) => setModalState(() => selectedPriceRange = 2),
+                    onSelected: (_) { 
+                      setModalState(() {
+                        selectedPriceRange = (selectedPriceRange == 2) ? -1 : 2;                                 
+                      });
+                    },
                   ),
                 ],
               ),
               SizedBox(height: 16),
-              ElevatedButton(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setModalState(() {
+                        selectedCategoryIndex = -1;
+                        selectedPriceRange = -1;
+                      });
+                    },
+                    child: Text ('Reset Filter'),
+                  ),
+                  ElevatedButton(
                 onPressed: () {
-                  setState(() {});
                   Navigator.pop(context);
+                  setState(() {});                 
                 },
-                child: Text("Terapkan Filter"),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
+                child: Text("Terapkan Filter"),                              
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
+
