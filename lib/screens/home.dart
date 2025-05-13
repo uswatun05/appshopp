@@ -53,16 +53,14 @@ class _HomeState extends State<Home> {
 
     // Filter berdasarkan harga
    if (selectedPriceRange != -1) {
-  if (selectedPriceRange == 0) {
-    filtered = filtered.where((product) => product.price < 50000).toList();
-  } else if (selectedPriceRange == 1) {
-    filtered = filtered.where((product) => product.price >= 50000 && product.price <= 100000).toList();
-  } else if (selectedPriceRange == 2) {
-    filtered = filtered.where((product) => product.price > 100000).toList();
+     if (selectedPriceRange == 0) {
+      filtered = filtered.where((product) => product.price < 50000).toList();
+    } else if (selectedPriceRange == 1) {
+      filtered = filtered.where((product) => product.price >= 50000 && product.price <= 100000).toList();
+    } else if (selectedPriceRange == 2) {
+      filtered = filtered.where((product) => product.price > 100000).toList();
+    }
   }
-}
-
-
     return filtered;
   }
 
@@ -97,17 +95,17 @@ class _HomeState extends State<Home> {
               ),
             ],
           ),
-          IconButton(
+          Builder(
+            builder: (context) => IconButton(
             icon: Icon(Icons.filter_list),
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => buildFilterSheet(),
-              );
-            },
+            onPressed:() {
+              Scaffold.of(context).openEndDrawer();
+              },
+            ),
           ),
         ],
       ),
+      endDrawer: buildFilterDrawer(),
       body: Padding(
         padding: EdgeInsets.all(12),
         child: SingleChildScrollView(
@@ -256,92 +254,98 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget buildFilterSheet() {
-    return StatefulBuilder(
-      builder: (context, setModalState) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Filter Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
-              Wrap(
-                spacing: 8,
-                children: List.generate(categories.length, (index) {
-                  return ChoiceChip(
-                    label: Text(categories[index]),
-                    selected: selectedCategoryIndex == index,
-                    onSelected: (bool selected) {
-                      setModalState(() {
-                        if (selectedCategoryIndex == index) {
+  Widget buildFilterDrawer() {
+  return Drawer(
+    child: SafeArea(
+      child: Center(
+        child: Container(
+
+          constraints: BoxConstraints(maxHeight: 500),
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Filter Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing : 8,
+                  children: List.generate(categories.length, (index) {
+                    return ChoiceChip(
+                      label: Text(categories[index]),
+                      selected: selectedCategoryIndex == index,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          selectedCategoryIndex = selected ? index : -1;
+                        });
+                      },
+                    );
+                  }),
+                ),
+                SizedBox(height: 16),
+                Text("Filter Harga", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilterChip(
+                      label: Text("< Rp50rb"),
+                      selected: selectedPriceRange == 0,
+                      onSelected: (_) {
+                        setState(() {
+                          selectedPriceRange = (selectedPriceRange == 0) ? -1 : 0;
+                        });
+                      },
+                    ),
+                    FilterChip(
+                      label: Text("Rp50rb–Rp100rb"),
+                      selected: selectedPriceRange == 1,
+                      onSelected: (_) {
+                        setState(() {
+                          selectedPriceRange = (selectedPriceRange == 1) ? -1 : 1;
+                        });
+                      },
+                    ),
+                    FilterChip(
+                      label: Text("> Rp100rb"),
+                      selected: selectedPriceRange == 2,
+                      onSelected: (_) {
+                        setState(() {
+                          selectedPriceRange = (selectedPriceRange == 2) ? -1 : 2;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
                           selectedCategoryIndex = -1;
-                        } else {
-                          selectedCategoryIndex = index;
-                        }
-                      });
-                    },
-                  );
-                }),
-              ),
-              SizedBox(height: 16),
-              Text("Filter Harga", style: TextStyle(fontWeight: FontWeight.bold)),
-              Wrap(
-                spacing: 8,
-                children: [
-                  FilterChip(
-                    label: Text("< Rp50rb"),
-                    selected: selectedPriceRange == 0,
-                    onSelected: (_) {
-                      setModalState(() {
-                         selectedPriceRange = (selectedPriceRange == 0) ? -1 : 0;
-                      });
-                    },
-                  ),
-                  FilterChip(
-                    label: Text("Rp50rb–Rp100rb"),
-                    selected: selectedPriceRange == 1,
-                    onSelected: (_) {setModalState(() { selectedPriceRange = (selectedPriceRange == 1) ? -1 : 1;
-                      });
-                    },
-                  ),
-                  FilterChip(
-                    label: Text("> Rp100rb"),
-                    selected: selectedPriceRange == 2,
-                    onSelected: (_) { 
-                      setModalState(() {
-                        selectedPriceRange = (selectedPriceRange == 2) ? -1 : 2;                                 
-                      });
-                    },
+                          selectedPriceRange = -1;
+                        });
+                      },
+                      child: Text('Reset Filter'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).maybePop();
+                      },
+                      child: Text("Terapkan Filter"),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      setModalState(() {
-                        selectedCategoryIndex = -1;
-                        selectedPriceRange = -1;
-                      });
-                    },
-                    child: Text ('Reset Filter'),
-                  ),
-                  ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  setState(() {});                 
-                },
-                child: Text("Terapkan Filter"),                              
-                ),
-              ],
             ),
-          ],
+          ),
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
 }
-
