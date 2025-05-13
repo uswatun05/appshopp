@@ -25,7 +25,16 @@ class _SplashState extends State<Splash> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    
+    // 
+    Future.delayed(const Duration(seconds:6),(){
+      if (mounted){
+      Navigator.pushReplacement(
+        context,
+      MaterialPageRoute(builder: (context)=> Home()),
+      );
+      }
+    });
+
     _logoController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 1200),
@@ -79,7 +88,7 @@ class _SplashState extends State<Splash> with TickerProviderStateMixin {
         children: [
           // Background Gradient
           AnimatedContainer(
-            duration: Duration(seconds: 5),
+            duration: Duration(seconds: 3),
             onEnd: () {
               setState(() {
                 _gradientIndex = (_gradientIndex + 1) % _gradients.length;
